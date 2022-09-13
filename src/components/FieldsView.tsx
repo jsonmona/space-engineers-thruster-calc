@@ -4,10 +4,17 @@ import NumberFieldWithUnit from "./NumberFieldWithUnit";
 import {FieldsContextObject} from "./FieldsContext";
 import {field_descriptions, field_names} from "../logics/FieldDescription";
 import UnitValue from "../logics/UnitValue";
-import Fields from '../logics/Fields';
+
+const Box = styled('div')`
+  display: flex;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+`;
 
 const Row = styled('div')`
-    padding: .5rem;
+  padding: .5rem;
+  width: 30rem;
+  min-width: 25rem;
 `;
 
 function FieldsView() {
@@ -26,32 +33,42 @@ function FieldsView() {
         return true;
     }
 
-    return (
-        <div>
-            {field_names.map(key => {
-                const desc = field_descriptions[key];
-                if (typeof desc === 'undefined')
-                    throw new Error(`Unable to find key ${key} from field_descriptions`);
-                const field = fields[key] as number | UnitValue;
-                if (typeof field === 'undefined')
-                    throw new Error(`Unable to find key ${key} from fields`);
+    const mapper = (key: string, readonly: boolean) => {
+        const desc = field_descriptions[key];
+        if (typeof desc === 'undefined')
+            throw new Error(`Unable to find key ${key} from field_descriptions`);
+        const field = fields[key] as number | UnitValue;
+        if (typeof field === 'undefined')
+            throw new Error(`Unable to find key ${key} from fields`);
 
-                if (typeof field === 'number')
-                    return (
-                        <Row key={key}>
-                            {desc.display_name}
-                            <NumberFieldWithUnit unit={''} value={fields[key]} onChange={x => handleNumberChange(key, x)} readonly={desc.readonly} />
-                        </Row>
-                    );
-                else
-                    return (
-                        <Row key={key}>
-                            {desc.display_name}
-                            <NumberFieldWithUnit unit={desc.preferred_prefix + desc.unit!} value={fields[key].getValueWithPrefix(desc.preferred_prefix!)} onChange={x => handleUnitChange(key, x)} readonly={desc.readonly} />
-                        </Row>
-                    );
-            })}
-        </div>
+        if (desc.readonly !== readonly)
+            return null;
+
+        if (typeof field === 'number')
+            return (
+                <Row key={key}>
+                    {desc.display_name}
+                    <NumberFieldWithUnit unit={''} value={fields[key]} onChange={x => handleNumberChange(key, x)} readonly={desc.readonly} />
+                </Row>
+            );
+        else
+            return (
+                <Row key={key}>
+                    {desc.display_name}
+                    <NumberFieldWithUnit unit={desc.preferred_prefix + desc.unit!} value={fields[key].getValueWithPrefix(desc.preferred_prefix!)} onChange={x => handleUnitChange(key, x)} readonly={desc.readonly} />
+                </Row>
+            );
+    }
+
+    return (
+        <>
+            <Box>
+                {field_names.map(key => mapper(key, false))}
+            </Box>
+            <Box>
+                {field_names.map(key => mapper(key, true))}
+            </Box>
+        </>
     );
 }
 
