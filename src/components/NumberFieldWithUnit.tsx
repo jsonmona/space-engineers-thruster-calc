@@ -13,15 +13,20 @@ const NumberField = styled('input')`
   color: #000;
 `;
 
+const ReadOnlyNumberField = styled(NumberField)`
+    background-color: #ccc;
+`;
+
 const REGEX_NUMERIC = /[^0-9]/g;
 
 interface Props {
     unit: string;
     value: string;
     onChange: (newValue: string) => void;
+    readonly: boolean;
 }
 
-function NumberFieldWithUnit({unit, value, onChange}: Props) {
+function NumberFieldWithUnit({unit, value, onChange, readonly}: Props) {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newData = e.target.value.replaceAll(REGEX_NUMERIC, '');
         onChange(newData);
@@ -30,7 +35,7 @@ function NumberFieldWithUnit({unit, value, onChange}: Props) {
 
     return (
         <Container>
-            <NumberField onChange={handleChange} value={value}/>
+            {readonly ? <ReadOnlyNumberField value={value} readOnly={true}/> : <NumberField onChange={handleChange} value={value}/>}
             {unit}
         </Container>
     );
